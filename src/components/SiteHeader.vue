@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import {
@@ -21,14 +21,17 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Search, LogOut, Settings, HelpCircle } from 'lucide-vue-next'
+import { Input } from '@/components/ui/input'
+import { Search, LogOut, Settings, HelpCircle, X } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const showSearch = ref(false)
+const searchQuery = ref('')
 
-const handleLogout = () => {
-  authStore.logout()
+const handleLogout = async () => {
+  await authStore.logout()
   router.push('/login')
 }
 
@@ -44,10 +47,27 @@ const getUserInitials = () => {
 
 const currentPageName = computed(() => {
   const path = route.path
+  if (path === '/admin/dashboard') return 'Admin Dashboard'
+  if (path === '/admin/mitra') return 'Manajemen Mitra'
+  if (path === '/admin/users') return 'Manajemen User'
+  if (path === '/mitra/dashboard') return 'Mitra Dashboard'
   if (path === '/dashboard') return 'Dashboard'
-  if (path === '/products') return 'Products'
   return 'Page'
 })
+
+const toggleSearch = () => {
+  showSearch.value = !showSearch.value
+  if (!showSearch.value) {
+    searchQuery.value = ''
+  }
+}
+
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    console.log('Searching for:', searchQuery.value)
+    // TODO: Implement global search functionality
+  }
+}
 </script>
 
 <template>
@@ -55,7 +75,7 @@ const currentPageName = computed(() => {
     <div class="flex items-center gap-2 flex-1">
       <SidebarTrigger class="-ml-1" />
       <Separator orientation="vertical" class="mr-2 h-4" />
-      <Breadcrumb>
+      <Breadcrumb v-if="!showSearch">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="/dashboard">
@@ -68,14 +88,27 @@ const currentPageName = computed(() => {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+      
+      <!-- Search Input -->
+      <div v-if="showSearch" class="flex-1 max-w-md">
+        <Input
+          v-model="searchQuery"
+          placeholder="Search..."
+          @keyup.enter="handleSearch"
+          class="w-full"
+          autofocus
+        />
+      </div>
     </div>
     
     <div class="flex items-center gap-2">
       <button
+        @click="toggleSearch"
         class="flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground"
-        aria-label="Search"
+        :aria-label="showSearch ? 'Close search' : 'Search'"
       >
-        <Search class="h-4 w-4" />
+        <X v-if="showSearch" class="h-4 w-4" />
+        <Search v-else class="h-4 w-4" />
       </button>
       
       <DropdownMenu>

@@ -1,2 +1,3 @@
 export { useAuthStore } from './auth.store'
-export { useProductStore } from './product.store'
+export { useMitraStore } from './mitra.store'
+export { useAdminStore } from './admin.store'
