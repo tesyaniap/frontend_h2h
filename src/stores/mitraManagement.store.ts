@@ -1,90 +1,6 @@
 import { defineStore } from 'pinia'
-// import { mitraService } from '@/services/mitra.service'
+import { mitraService } from '@/services/mitra.service'
 import type { MitraListItem } from '@/types/admin.types'
-
-// Mock data - expanded for pagination
-const mockMitraList: MitraListItem[] = [
-  {
-    id: 1,
-    nama: 'PT Shuttle Express',
-    email: 'admin@shuttleexpress.com',
-    saldo_deposit: 15000000,
-    total_transaksi: 245,
-    total_fee: 2450000,
-    status: 'aktif',
-    tanggal_bergabung: '2023-06-15'
-  },
-  {
-    id: 2,
-    nama: 'CV Trans Jaya',
-    email: 'info@transjaya.com',
-    saldo_deposit: 8500000,
-    total_transaksi: 156,
-    total_fee: 1560000,
-    status: 'aktif',
-    tanggal_bergabung: '2023-08-22'
-  },
-  {
-    id: 3,
-    nama: 'UD Berkah Transport',
-    email: 'contact@berkahtransport.com',
-    saldo_deposit: 3200000,
-    total_transaksi: 89,
-    total_fee: 890000,
-    status: 'nonaktif',
-    tanggal_bergabung: '2023-11-10'
-  },
-  {
-    id: 4,
-    nama: 'PT Nusantara Shuttle',
-    email: 'hello@nusantarashuttle.com',
-    saldo_deposit: 22000000,
-    total_transaksi: 378,
-    total_fee: 3780000,
-    status: 'aktif',
-    tanggal_bergabung: '2023-04-08'
-  },
-  {
-    id: 5,
-    nama: 'CV Smart Travel',
-    email: 'admin@smarttravel.com',
-    saldo_deposit: 12500000,
-    total_transaksi: 203,
-    total_fee: 2030000,
-    status: 'aktif',
-    tanggal_bergabung: '2023-09-14'
-  },
-  {
-    id: 6,
-    nama: 'PT Rapid Bus',
-    email: 'info@rapidbus.com',
-    saldo_deposit: 18000000,
-    total_transaksi: 312,
-    total_fee: 3120000,
-    status: 'aktif',
-    tanggal_bergabung: '2023-05-20'
-  },
-  {
-    id: 7,
-    nama: 'CV Metro Transport',
-    email: 'admin@metrotransport.com',
-    saldo_deposit: 6500000,
-    total_transaksi: 134,
-    total_fee: 1340000,
-    status: 'nonaktif',
-    tanggal_bergabung: '2023-10-05'
-  },
-  {
-    id: 8,
-    nama: 'PT Express Line',
-    email: 'contact@expressline.com',
-    saldo_deposit: 25000000,
-    total_transaksi: 456,
-    total_fee: 4560000,
-    status: 'aktif',
-    tanggal_bergabung: '2023-03-12'
-  }
-]
 
 export const useMitraManagementStore = defineStore('mitraManagement', {
   state: () => ({
@@ -112,12 +28,34 @@ export const useMitraManagementStore = defineStore('mitraManagement', {
       this.loading = true
       this.error = null
       try {
-        await new Promise(resolve => setTimeout(resolve, 500))
-        this.mitraList = mockMitraList
+        console.log('Fetching mitra list...')
+        const response = await mitraService.getMitraList()
+        console.log('API Response:', response)
+        console.log('Response.data:', response.data)
+        console.log('Is array?', Array.isArray(response.data))
+        
+        const mitraData = Array.isArray(response.data) ? response.data : []
+        console.log('Mitra data to transform:', mitraData)
+        
+        this.mitraList = mitraData.map((mitra: any) => ({
+          id: mitra.id,
+          nama: mitra.name || '',
+          email: mitra.email || '',
+          saldo_deposit: parseFloat(mitra.balance?.toString() || '0'),
+          total_transaksi: 0,
+          total_fee: 0,
+          status: mitra.status === 'active' ? 'aktif' : 'nonaktif',
+          tanggal_bergabung: mitra.created_at || new Date().toISOString()
+        }))
+        
+        console.log('Transformed mitra list:', this.mitraList)
         this.applyFilters()
+        console.log('After filter:', this.filteredList)
       } catch (error: any) {
+        console.error('Failed to fetch mitra list:', error)
         this.error = error.message || 'Failed to fetch mitra list'
-        throw error
+        this.mitraList = []
+        this.filteredList = []
       } finally {
         this.loading = false
       }

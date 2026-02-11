@@ -1,9 +1,17 @@
 import { api } from './api.service'
-import type { Role, RoleFormData, ApiResponse } from '@/types/role.types'
+import type { Role, RoleFormData, ApiResponse, Permission } from '@/types/role.types'
 
 class RoleService {
   async getRoles(): Promise<ApiResponse<Role[]>> {
     const response = await api.get('/v1/roles')
+    return response.data
+  }
+
+  async getPermissions(): Promise<ApiResponse<Permission[]>> {
+    console.log('Calling GET /v1/permissions')
+    const response = await api.get('/v1/permissions')
+    console.log('Permissions API response:', response)
+    console.log('Response data:', response.data)
     return response.data
   }
 
@@ -13,7 +21,13 @@ class RoleService {
   }
 
   async updateRolePermissions(roleId: number, permissions: number[]): Promise<ApiResponse<Role>> {
-    const response = await api.put(`/v1/roles/${roleId}/permissions`, { permissions })
+    console.log('Sending permissions:', permissions)
+    console.log('Type:', typeof permissions, 'IsArray:', Array.isArray(permissions))
+    
+    const payload = { permissions }
+    console.log('Final payload:', JSON.stringify(payload))
+    
+    const response = await api.post(`/v1/roles/${roleId}/permissions`, payload)
     return response.data
   }
 }

@@ -18,6 +18,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
@@ -29,10 +39,12 @@ const route = useRoute()
 const authStore = useAuthStore()
 const showSearch = ref(false)
 const searchQuery = ref('')
+const showLogoutDialog = ref(false)
 
 const handleLogout = async () => {
   await authStore.logout()
   router.push('/login')
+  showLogoutDialog.value = false
 }
 
 const getUserInitials = () => {
@@ -140,7 +152,7 @@ const handleSearch = () => {
             <span>Get Help</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem @click="handleLogout">
+          <DropdownMenuItem @click="showLogoutDialog = true">
             <LogOut class="mr-2 h-4 w-4" />
             <span>Log out</span>
           </DropdownMenuItem>
@@ -148,4 +160,20 @@ const handleSearch = () => {
       </DropdownMenu>
     </div>
   </header>
+
+  <!-- Logout Confirmation Dialog -->
+  <AlertDialog v-model:open="showLogoutDialog">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Konfirmasi Logout</AlertDialogTitle>
+        <AlertDialogDescription>
+          Apakah Anda yakin ingin keluar dari sistem?
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Batal</AlertDialogCancel>
+        <AlertDialogAction @click="handleLogout">Logout</AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>

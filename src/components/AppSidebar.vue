@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { Home, Users, Bus, User, Shield, FileText, UserPlus } from 'lucide-vue-next'
+import { Home, Users, Bus, User, Shield, FileText, UserPlus, Wallet } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
@@ -31,9 +31,9 @@ const navigationItems = [
     path: '/admin/mitra',
   },
   {
-    title: 'Tambah Mitra',
-    icon: UserPlus,
-    path: '/admin/mitra/add',
+    title: 'Approval Top Up',
+    icon: Wallet,
+    path: '/admin/topup-approval',
   },
   {
     title: 'Data Pengguna',
@@ -41,9 +41,9 @@ const navigationItems = [
     path: '/admin/users',
   },
   {
-    title: 'Role & Permission',
+    title: 'Role Management',
     icon: Shield,
-    path: '/admin/role-permission',
+    path: '/admin/role-management',
   },
   {
     title: 'Laporan',

@@ -37,15 +37,15 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/admin/roles',
+    path: '/admin/role-management',
     name: 'RoleManagement',
     component: () => import('@/views/Admin/RoleManagement.vue'),
     meta: { requiresAuth: true },
   },
   {
-    path: '/admin/role-permission',
-    name: 'RolePermission',
-    component: () => import('@/views/Admin/RolePermissionView.vue'),
+    path: '/admin/topup-approval',
+    name: 'TopupApproval',
+    component: () => import('@/views/Admin/TopupApproval.vue'),
     meta: { requiresAuth: true },
   },
   {
