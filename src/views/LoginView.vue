@@ -44,9 +44,11 @@
       </div>
       
       <div class="text-center text-sm text-muted-foreground bg-muted px-4 py-3 rounded-lg">
-        <p class="font-medium mb-1">Kredensial Login:</p>
-        <p><strong>Email:</strong> admin@example.com</p>
-        <p><strong>Password:</strong> password</p>
+        <p class="font-medium mb-2">Kredensial Login:</p>
+        <div class="space-y-1">
+          <p><strong>Admin:</strong> admin@example.com / password</p>
+          <p><strong>Mitra:</strong> mitra@example.com / password</p>
+        </div>
       </div>
     </div>
   </div>
@@ -75,12 +77,20 @@ const handleLogin = async () => {
   loading.value = true
   error.value = ''
   try {
-    await authStore.login({ email: email.value, password: password.value })
+    const result = await authStore.login({ email: email.value, password: password.value })
     toast({
       title: 'Login berhasil!',
       description: 'Selamat datang kembali',
     })
-    router.push('/admin/dashboard')
+    
+    // Redirect berdasarkan role
+    if (result.role === 'admin') {
+      router.push('/admin/dashboard')
+    } else if (result.role === 'mitra') {
+      router.push('/mitra/dashboard')
+    } else {
+      router.push('/')
+    }
   } catch (err: any) {
     error.value = err.message || 'Login gagal. Periksa email dan password Anda.'
   } finally {

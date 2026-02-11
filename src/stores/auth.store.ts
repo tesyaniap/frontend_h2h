@@ -10,6 +10,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => state.isLoggedIn && !!state.token,
+    userRole: (state) => state.user?.role || null,
   },
 
   actions: {
@@ -29,7 +30,7 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('token', access_token)
         localStorage.setItem('user', JSON.stringify(user))
 
-        return { success: true }
+        return { success: true, role: user.role }
       } catch (error: any) {
         console.error('Login failed:', error)
         throw error
