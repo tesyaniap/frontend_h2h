@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
-import { api } from '@/services/api.service'
 
 const routes: RouteRecordRaw[] = [
   // ===== PUBLIC =====
@@ -8,12 +7,6 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'Login',
     component: () => import('@/views/LoginView.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/unauthorized',
-    name: 'Unauthorized',
-    component: () => import('@/views/UnauthorizedView.vue'),
     meta: { requiresAuth: false },
   },
 
@@ -35,43 +28,43 @@ const routes: RouteRecordRaw[] = [
     path: '/admin/dashboard',
     name: 'AdminDashboard',
     component: () => import('@/views/Admin/AdminDashboard.vue'),
-    meta: { requiresAuth: true, role: 'admin', permission: 'dashboard.admin' },
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/mitra',
     name: 'MitraManagement',
     component: () => import('@/views/Admin/MitraManagement.vue'),
-    meta: { requiresAuth: true, role: 'admin', permission: 'mitra.view' },
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/mitra/add',
     name: 'AddMitra',
     component: () => import('@/views/Admin/AddMitra.vue'),
-    meta: { requiresAuth: true, role: 'admin', permission: 'mitra.create' },
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/users',
     name: 'UserManagement',
     component: () => import('@/views/Admin/UserManagement.vue'),
-    meta: { requiresAuth: true, role: 'admin', permission: 'users.view' },
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/role-management',
     name: 'RoleManagement',
     component: () => import('@/views/Admin/RoleManagement.vue'),
-    meta: { requiresAuth: true, role: 'admin', permission: 'roles.view' },
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/topup-approval',
     name: 'TopupApproval',
     component: () => import('@/views/Admin/TopupApproval.vue'),
-    meta: { requiresAuth: true, role: 'admin', permission: 'topups.approve' },
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/reports',
     name: 'Reports',
     component: () => import('@/views/Admin/ReportView.vue'),
-    meta: { requiresAuth: true, role: 'admin', permission: 'reports.transactions' },
+    meta: { requiresAuth: true, role: 'admin' },
   },
   {
     path: '/admin/profile',
@@ -109,14 +102,13 @@ const router = createRouter({
 })
 
 // ===== NAVIGATION GUARD =====
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const isAuthenticated = authStore.isAuthenticated
   const userRole = authStore.userRole
 
   const requiresAuth = to.meta.requiresAuth !== false
   const requiredRole = to.meta.role as string | undefined
-  const requiredPermission = to.meta.permission as string | undefined
 
   // 1️⃣ Belum login tapi butuh auth
   if (requiresAuth && !isAuthenticated) {
@@ -135,20 +127,13 @@ router.beforeEach(async (to, from, next) => {
 
   // 3️⃣ Role tidak sesuai
   if (requiredRole && userRole !== requiredRole) {
-    return next({ name: 'Unauthorized' })
-  }
-
-  // 4️⃣ Cek permission
-  if (requiredPermission && isAuthenticated) {
-    try {
-      const response = await api.get('/v1/auth/permissions')
-      const permissions = response.data.data.permissions || []
-      if (!permissions.includes(requiredPermission)) {
-        return next({ name: 'Unauthorized' })
-      }
-    } catch (error) {
-      return next({ name: 'Unauthorized' })
+    if (userRole === 'admin') {
+      return next({ name: 'AdminDashboard' })
     }
+    if (userRole === 'mitra') {
+      return next({ name: 'MitraDashboard' })
+    }
+    return next({ name: 'Login' })
   }
 
   next()
